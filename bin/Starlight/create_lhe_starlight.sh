@@ -5,47 +5,47 @@ EXPECTED_ARGS=17
 rebuildFromSource=true
 runLocally=false
 if [ $runLocally == false ]; then
-EXPECTED_ARGS=$((EXPECTED_ARGS-2))
+    EXPECTED_ARGS=$((EXPECTED_ARGS-2))
 fi
 
 if [ $# -ge $EXPECTED_ARGS ]
 then
-  if [ $runLocally == true ]; then 
-  echo "For local running, Usage: `basename $0` Production_type Channel Beam1_Z Beam2_Z Beam1_A Beam2_A Beam1_Gamma Beam2_Gamma Eta_cut EtaMin EtaMax BreakupMode Nevents RandomSeed "
-  else echo "For gridpack production, Usage: `basename $0` Production_type Channel Beam1_Z Beam2_Z Beam1_A Beam2_A Beam1_Gamma Beam2_Gamma Eta_cut EtaMin EtaMax BreakupMode"
-  fi
-  echo "Production type can range from 1-4; available channels can be found on https://starlight.hepforge.org/"  
-  exit 1
+    if [ $runLocally == true ]; then 
+        echo "For local running, Usage: `basename $0` Production_type Channel Beam1_Z Beam2_Z Beam1_A Beam2_A Beam1_Gamma Beam2_Gamma Eta_cut EtaMin EtaMax BreakupMode Nevents RandomSeed "
+    else echo "For gridpack production, Usage: `basename $0` Production_type Channel Beam1_Z Beam2_Z Beam1_A Beam2_A Beam1_Gamma Beam2_Gamma Eta_cut EtaMin EtaMax BreakupMode"
+    fi
+    echo "Production type can range from 1-4; available channels can be found on https://starlight.hepforge.org/"  
+    exit 1
 fi
 
 #setting all default values...
-prodType=${1:-6}
-channel=${2:-11}
-Beam1Z=${3:-54}
-Beam2Z=${4:-54}
-Beam1A=${5:-129}
-Beam2A=${6:-129}
-Beam1Gamma=${7:-2889.0}
-Beam2Gamma=${8:-2889.0}
+prodType=${1:-1}
+channel=${2:-13}
+Beam1Z=${3:-82}
+Beam2Z=${4:-82}
+Beam1A=${5:-208}
+Beam2A=${6:-208}
+Beam1Gamma=${7:-2675.1}
+Beam2Gamma=${8:-2675.1}
 BreakupMode=${9:-5}
 EtaCut=${10:-1}
-EtaMin=${11:--6}
-EtaMax=${12:-6}
-PtCut=${13:-0}
-PtMin=${14:-1.0}
-PtMax=${15:-3.0}
-nevts=${16:-10000}
-seed=${17:-121212}
+EtaMin=${11:--2.5}
+EtaMax=${12:-2.5}
+PtCut=${13:-1}
+PtMin=${14:-3.0}
+PtMax=${15:-300.0}
+nevts=${16:-100}
+seed=${17:-$RANDOM}
 
 echo "   ______________________________________     "
 echo "         Running Starlight...                 "
 echo "   ______________________________________     "
 
 if [ $runLocally == true ]; then
-echo "Generating $nevts events with production type $prodType, channel $channel"
-echo "Random seed set to $seed"
+    echo "Generating $nevts events with production type $prodType, channel $channel"
+    echo "Random seed set to $seed"
 else
-echo "Generating GRIDPACK with production type $prodType, channel $channel"
+    echo "Generating GRIDPACK with production type $prodType, channel $channel"
 fi
 echo "Beam1: Z=$Beam1Z, A=$Beam1A, Gamma=$Beam1Gamma;  Beam2: Z=$Beam2Z, A=$Beam2A, Gamma=$Beam2Gamma"
 echo "BreakupMode: $BreakupMode"
@@ -57,19 +57,19 @@ else echo "Pt Cuts ON from $PtMin to $PtMax"
 fi
 
 if [ ${CMSSW_BASE} == "" ]; then
-echo "CMSSW_BASE not found! Please run cmsenv first!"
-exit 1
+    echo "CMSSW_BASE not found! Please run cmsenv first!"
+    exit 1
 fi
 
 if [ $rebuildFromSource == true ]; then
-echo "rebuilding starlight from source..."
+    echo "rebuilding starlight from source..."
 else
-echo "using precompiled starlight setup..."
+    echo "using precompiled starlight setup..."
 fi
 if [ $runLocally == true ]; then
-echo "will run starlight locally. Please turn off the \"runLocally\" flag for gridpack production"
+    echo "will run starlight locally. Please turn off the \"runLocally\" flag for gridpack production"
 else
-echo "Just producing a starlight gridpack..."
+    echo "Just producing a starlight gridpack..."
 fi
 
 name="starlightProd"
@@ -88,31 +88,33 @@ cd -
 # # retrieve the latest Starlight version from SVN if you want
 if [ $rebuildFromSource == true ]
 then
-   svn co http://starlight.hepforge.org/svn/trunk
-   mv trunk starlightTrunk
-   wget --no-verbose --no-check-certificate http://cms-project-generators.web.cern.ch/cms-project-generators/starlight/dpmjet3.0-5.tar
-   tar -xvf dpmjet3.0-5.tar
-   mv dpmjet3.0-5 dpmjetV305
-   cp phojet1.12-35c4.f dpmjetV305
-   cp dpmjetMakefile dpmjetV305/Makefile 
-   cp starlightTrunk/external/fpe.c dpmjetV305
-   cd dpmjetV305
-   make
-   gcc fpe.c -Wall -g -c
-   make
-   cd ..
-   export DPMJETDIR="$(pwd)/dpmjetV305"
-   cd starlightTrunk
-   mkdir -p build
-   cd build
-   cmake .. -DENABLE_DPMJET=ON
-   gmake
+    wget 'https://starlight.hepforge.org/downloads?f=starlight_r300.tar'
+    mv 'downloads?f=starlight_r300.tar' starlight_r300.tar
+    tar xvf starlight_r300.tar
+    mv trunk starlightTrunk
+    wget --no-verbose --no-check-certificate http://cms-project-generators.web.cern.ch/cms-project-generators/starlight/dpmjet3.0-5.tar
+    tar -xvf dpmjet3.0-5.tar
+    mv dpmjet3.0-5 dpmjetV305
+    cp phojet1.12-35c4.f dpmjetV305
+    cp dpmjetMakefile dpmjetV305/Makefile 
+    cp starlightTrunk/external/fpe.c dpmjetV305
+    cd dpmjetV305
+    make
+    gcc fpe.c -Wall -g -c
+    make
+    cd ..
+    export DPMJETDIR="$(pwd)/dpmjetV305"
+    cd starlightTrunk
+    mkdir -p build
+    cd build
+    cmake .. -DENABLE_DPMJET=ON
+    gmake
 fi
 
 #or get the precompiled version on lxplus
 if [ $rebuildFromSource == false ]
 then
-  cd starlightTrunk/build
+    cd starlightTrunk/build
 fi
 
 #get the standard slight.in template
@@ -124,11 +126,11 @@ BEAM_2_Z = B2Z   #Z of target
 BEAM_2_A = B2A   #A of target
 BEAM_1_GAMMA = B1G #Gamma of the colliding ion 1
 BEAM_2_GAMMA = B2G #Gamma of the colliding ion 2
-W_MAX = 12.0   #Max value of w
-W_MIN = 2.0    #Min value of w
-W_N_BINS = 40    #Bins i w
-RAP_MAX = 8.    #max y
-RAP_N_BINS = 80    #Bins i y
+W_MAX = 120.0   #Max value of w
+W_MIN = 6.0    #Min value of w
+W_N_BINS = 200    #Bins i w
+RAP_MAX = 3.    #max y
+RAP_N_BINS = 60    #Bins i y
 CUT_PT = PtCut #Cut in pT? 0 = (no, 1 = yes)
 PT_MIN = PtMin #Minimum pT in GeV
 PT_MAX = PtMax #Maximum pT in GeV
@@ -152,11 +154,10 @@ EOFILE
 #fi
 
 if [ $runLocally == true ]; then
-cat slightTemplate.in | sed -e "s#RNDSEED#${seed}#g" | sed -e "s#NEVT#${nevts}#g" | sed -e "s#PRODUCTIONCHANNEL#${channel}#g" | sed -e "s#PRODMODE#${prodType}#g" | sed -e "s#B1Z#${Beam1Z}#g" | sed -e "s#B2Z#${Beam2Z}#g" | sed -e "s#B1A#${Beam1A}#g" | sed -e "s#B2A#${Beam2A}#g" | sed -e "s#B1G#${Beam1Gamma}#g" | sed -e "s#B2G#${Beam2Gamma}#g" | sed -e "s#PtCut#${PtCut}#g" | sed -e "s#PtMin#${PtMin}#g" | sed -e "s#PtMax#${PtMax}#g" | sed -e "s#EtaCut#${EtaCut}#g" | sed -e "s#EtaMin#${EtaMin}#g" | sed -e "s#EtaMax#${EtaMax}#g" | sed -e "s#BreakupMode#${BreakupMode}#g" > slight.in
+    cat slightTemplate.in | sed -e "s#RNDSEED#${seed}#g" | sed -e "s#NEVT#${nevts}#g" | sed -e "s#PRODUCTIONCHANNEL#${channel}#g" | sed -e "s#PRODMODE#${prodType}#g" | sed -e "s#B1Z#${Beam1Z}#g" | sed -e "s#B2Z#${Beam2Z}#g" | sed -e "s#B1A#${Beam1A}#g" | sed -e "s#B2A#${Beam2A}#g" | sed -e "s#B1G#${Beam1Gamma}#g" | sed -e "s#B2G#${Beam2Gamma}#g" | sed -e "s#PtCut#${PtCut}#g" | sed -e "s#PtMin#${PtMin}#g" | sed -e "s#PtMax#${PtMax}#g" | sed -e "s#EtaCut#${EtaCut}#g" | sed -e "s#EtaMin#${EtaMin}#g" | sed -e "s#EtaMax#${EtaMax}#g" | sed -e "s#BreakupMode#${BreakupMode}#g" > slight.in
 fi
 
-cat slightTemplate.in | sed -e "s#PRODUCTIONCHANNEL#${channel}#g" | sed -e "s#PRODMODE#${prodType}#g" | sed -e "s#B1Z#${Beam1Z}#g" | sed -e "s#B2Z#${Beam2Z}#g" | sed -e "s#B1A#${Beam1A}#g" | sed -e "s#B2A#${Beam2A}#g" | sed -e "s#PtCut#${PtCut}#g" | sed -e "s#PtMin#${PtMin}#g" | sed -e "s#PtMax#${PtMax}#g" | sed -e "s#EtaCut#${EtaCut}#g" | sed -e "s#EtaMin#${EtaMin}#g" | sed -e "s#EtaMax#${EtaMax}#g" | sed -e "s#BreakupMode#${BreakupMode}#g" > slightTemplateForNextProd.in
-
+cat slightTemplate.in | sed -e "s#PRODUCTIONCHANNEL#${channel}#g" | sed -e "s#PRODMODE#${prodType}#g" | sed -e "s#B1Z#${Beam1Z}#g" | sed -e "s#B2Z#${Beam2Z}#g" | sed -e "s#B1A#${Beam1A}#g" | sed -e "s#B2A#${Beam2A}#g" | sed -e "s#B1G#${Beam1Gamma}#g" | sed -e "s#B2G#${Beam2Gamma}#g" | sed -e "s#PtCut#${PtCut}#g" | sed -e "s#PtMin#${PtMin}#g" | sed -e "s#PtMax#${PtMax}#g" | sed -e "s#EtaCut#${EtaCut}#g" | sed -e "s#EtaMin#${EtaMin}#g" | sed -e "s#EtaMax#${EtaMax}#g" | sed -e "s#BreakupMode#${BreakupMode}#g" > slightTemplateForNextProd.in
 
 cd ../..
 
@@ -165,28 +166,28 @@ cat starlightTrunk/config/my.input | sed -e "s#TARPAR         208.0      82.0#TA
 cp $DPMJETDIR/dpmjet.dat starlightTrunk/build
 
 if [ $runLocally == true ]; then
-echo "*** STARTING STARLIGHT PRODUCTION ***"
-cd starlightTrunk/build
-if [ $prodType -ge 4 ]; then
-./starlight < my.input &> log_${prodType}_${channel}_${seed}.txt
-else
-./starlight &> log_${prodType}_${channel}_${seed}.txt
-fi
-cp slight.out ${WORKDIR}/.
-cd ${WORKDIR}
-echo "***STARLIGHT COMPLETE***"
+    echo "*** STARTING STARLIGHT PRODUCTION ***"
+    cd starlightTrunk/build
+    if [ $prodType -ge 4 ]; then
+        ./starlight < my.input &> log_${prodType}_${channel}_${seed}.txt
+    else
+        ./starlight &> log_${prodType}_${channel}_${seed}.txt
+    fi
+    cp slight.out ${WORKDIR}/.
+    cd ${WORKDIR}
+    echo "***STARLIGHT COMPLETE***"
 
-#now convert the starlight file to a LHE file
-root -l -b << EOF
-.x convert_SL2LHE.C+(1,"slight.out","slight_${prodType}_${channel}_${seed}",${Beam1Gamma},${Beam2Gamma})
-.q
+    #now convert the starlight file to a LHE file
+    root -l -b << EOF
+    .x convert_SL2LHE.C+(1,"slight.out","slight_${prodType}_${channel}_${seed}",${Beam1Gamma},${Beam2Gamma})
+    .q
 EOF
-echo "*** LHE CONVERSION COMPLETE ***"
+    echo "*** LHE CONVERSION COMPLETE ***"
 
-echo "Output ready with log_${prodType}_${channel}_${seed}.txt and slight_${prodType}_${channel}_${seed}_GEN.root at `pwd` and $WORKDIR"
+    echo "Output ready with log_${prodType}_${channel}_${seed}.txt and slight_${prodType}_${channel}_${seed}_GEN.root at `pwd` and $WORKDIR"
 else
-tar -czf slightGridpack_ProdType${prodType}_Channel${channel}_beam${Beam1A}.tgz starlightTrunk convert_SL2LHE.C dpmjetV305 runcmsgrid_starlight.sh
-echo "Created starlight tarball: slightGridpack_ProdType${prodType}_Channel${channel}_beam${Beam1A}.tgz"
+    tar -czf slightGridpack_ProdType${prodType}_Channel${channel}_beam${Beam1A}.tgz starlightTrunk convert_SL2LHE.C dpmjetV305 runcmsgrid_starlight.sh
+    echo "Created starlight tarball: slightGridpack_ProdType${prodType}_Channel${channel}_beam${Beam1A}.tgz"
 fi
 
 echo "End of job on " `date`

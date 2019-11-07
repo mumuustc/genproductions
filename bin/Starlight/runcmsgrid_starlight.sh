@@ -19,26 +19,26 @@ echo "%MSG-MG5 Using Production mode $prodType"
 nevt=${2}
 echo "%MSG-MG5 number of events requested = $nevt"
 
+#rnum=$RANDOM
 rnum=${3}
 echo "%MSG-MG5 random seed used for the run = $rnum"
 
 ncpu=${4}
 echo "%MSG-MG5 number of cpus = $ncpu"
 
-
 cmsEnergyDiv2=$((cmsEnergy/2))
 
 FILENAME='slightout'
 LHEWORKDIR=`pwd`
 use_gridpack_env=true
-if [ -n "$8" ]
+if [ -n "${8}" ]
   then
-  use_gridpack_env=$8
+  use_gridpack_env=${8}
 fi
 
 if [ "$use_gridpack_env" = true ]
   then
-    if [ -n "$9" ]
+    if [ -n "${9}" ]
       then
         scram_arch_version=${9}
       else
@@ -46,7 +46,7 @@ if [ "$use_gridpack_env" = true ]
     fi
     echo "%MSG-MG5 SCRAM_ARCH version = $scram_arch_version"
 
-    if [ -n "$10" ]
+    if [ -n "${10}" ]
       then
         cmssw_version=${10}
       else
@@ -65,13 +65,13 @@ cd $LHEWORKDIR
 tar xf $repo/$name
 
 cd starlightTrunk/build
-cat slightTemplateForNextProd.in | sed -e "s#RNDSEED#${rnum}#g" | sed -e "s#NEVT#${nevt}#g" | sed -e "s#B1G#${cmsEnergyDiv2}#g" | sed -e "s#B2G#${cmsEnergyDiv2}#g"  > slight.in
+cat slightTemplateForNextProd.in | sed -e "s#RNDSEED#${rnum}#g" | sed -e "s#NEVT#${nevt}#g" > slight.in
 
 echo "*** STARTING STARLIGHT PRODUCTION ***"
 if [ $prodType -ge 4 ]; then
-./starlight < my.input &> log_${prodType}_${seed}.txt
+./starlight < my.input &> log_${prodType}_${rnum}.txt
 else
-./starlight &> log_${prodType}_${seed}.txt
+./starlight &> log_${prodType}_${rnum}.txt
 fi
 #remove the spurious random seed output that is non LHE standard 
 cp slight.out ${LHEWORKDIR}
